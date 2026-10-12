@@ -1,0 +1,24 @@
+# Build and dependency directories
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Environment and secrets
+.env
+*.local
+
+# IDE configuration
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Log files
+*.log
+logs/
+
+# OS metadata
+.DS_Store
+Thumbs.db

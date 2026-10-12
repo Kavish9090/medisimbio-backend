@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:medisimbio_db}
+    username: ${DB_USERNAME:medisimbio_user}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+      idle-timeout: ${DB_POOL_IDLE_TIMEOUT:300000}
+      connection-timeout: ${DB_POOL_CONNECTION_TIMEOUT:20000}
+      pool-name: MediSimbioHikariProdPool
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: ${JPA_HIBERNATE_DDL_AUTO:validate}
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    locations: classpath:db/migration/common,classpath:db/migration/postgresql
+    validate-on-migrate: true
+
+logging:
+  level:
+    root: WARN
+    com.medisimbio.backend: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN

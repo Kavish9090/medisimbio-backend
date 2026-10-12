@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:medisimbio_test_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration/common,classpath:db/migration/h2
+
+logging:
+  level:
+    root: WARN
+    com.medisimbio.backend: INFO
+    org.springframework: WARN
