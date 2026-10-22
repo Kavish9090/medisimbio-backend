@@ -91,6 +91,16 @@ class DevAuthenticationBoundaryTest {
         }
 
         @Test
+        @DisplayName("Production profile: X-User-Role / X-User-Roles headers cannot authenticate or grant privileges (returns 401)")
+        void shouldRejectXUserRoleHeadersInProduction() throws Exception {
+            mockMvc.perform(get("/api/v1/patients/me")
+                            .header(DevAuthenticationFilter.HEADER_USER_ID, "attacker_mock_user_123")
+                            .header(DevAuthenticationFilter.HEADER_USER_ROLE, "SYSTEM_ADMIN")
+                            .header(DevAuthenticationFilter.HEADER_USER_ROLES, "DOCTOR,HOSPITAL_ADMIN"))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
         @DisplayName("Production profile: Public endpoints remain accessible")
         void shouldAllowPublicEndpointsInProduction() throws Exception {
             mockMvc.perform(get("/api/v1/health"))

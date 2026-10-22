@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -43,6 +44,8 @@ public class DevAuthenticationFilter extends OncePerRequestFilter {
 
     public static final String HEADER_USER_ID = "X-User-Id";
     public static final String HEADER_USER_EMAIL = "X-User-Email";
+    public static final String HEADER_USER_ROLE = "X-User-Role";
+    public static final String HEADER_USER_ROLES = "X-User-Roles";
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
 
@@ -76,11 +79,31 @@ public class DevAuthenticationFilter extends OncePerRequestFilter {
                     userEmail = userId + "@medisimbio.local";
                 }
 
+                Set<org.springframework.security.core.GrantedAuthority> authorities = new HashSet<>();
+                String rolesHeader = request.getHeader(HEADER_USER_ROLES);
+                if (rolesHeader == null || rolesHeader.isBlank()) {
+                    rolesHeader = request.getHeader(HEADER_USER_ROLE);
+                }
+                if (rolesHeader != null && !rolesHeader.isBlank()) {
+                    for (String r : rolesHeader.split(",")) {
+                        String clean = r.trim().toUpperCase();
+                        if (!clean.isBlank()) {
+                            if (!clean.startsWith("ROLE_")) {
+                                clean = "ROLE_" + clean;
+                            }
+                            authorities.add(new SimpleGrantedAuthority(clean));
+                        }
+                    }
+                }
+                if (authorities.isEmpty()) {
+                    authorities.add(new SimpleGrantedAuthority("ROLE_" + SecurityConstants.ROLE_PATIENT));
+                }
+
                 UserPrincipal principal = new UserPrincipal(
                         userId,
                         userId,
                         userEmail,
-                        Set.of(new SimpleGrantedAuthority("ROLE_" + SecurityConstants.ROLE_PATIENT)),
+                        authorities,
                         true
                 );
 
@@ -92,7 +115,8 @@ public class DevAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                log.debug("Dev authentication established for user ID [{}] on [{}]", userId, request.getRequestURI());
+                log.debug("Dev authentication established for user ID [{}] with roles [{}] on [{}]",
+                        userId, authorities, request.getRequestURI());
             }
         }
 
